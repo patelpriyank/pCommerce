@@ -54,6 +54,7 @@
   <ItemGroup>
     <Compile Include="Extensions\Ul_Li_Watin.cs" />
     <Compile Include="Amazon\Pages\AmazonBestSellersPage.cs" />
+    <Compile Include="Models\AmazonBestSellersItemInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Amazon\Scrap\ScrapAmazonBestSellers.cs" />
   </ItemGroup>

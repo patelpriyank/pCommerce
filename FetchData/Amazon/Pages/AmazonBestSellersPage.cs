@@ -20,5 +20,6 @@ namespace FetchData.Amazon.Pages
                 //return ((IElementContainer)Document.Element(Find.ById(ul_DepartmentId))).ElementOfType<Ul>("");
             }
         }
+        
     }
 }
