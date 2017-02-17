@@ -8,17 +8,19 @@ namespace FetchData.Amazon.Scrap
 {
     public class ScrapAmazonBestSellers
     {
-        Pages.AmazonBestSellersPage _bestSellersPage;
         public void Scrap()
         {
             using (var browser = new IE("https://www.amazon.com/Best-Sellers/zgbs/ref=zg_bsms_tab"))
             {
-                _bestSellersPage = browser.Page<Pages.AmazonBestSellersPage>();
+                var bestSellersPage = browser.Page<Pages.AmazonBestSellersPage>();
 
-                Console.WriteLine( _bestSellersPage.Ul_DepartmentMenuRoot.InnerHtml);
-                Console.WriteLine( _bestSellersPage.Ul_DepartmentList.InnerHtml);
-                var allDepts =  _bestSellersPage.Ul_DepartmentList.Items;
-                _traverseDepartmentMenuTree(allDepts[0],  _bestSellersPage.Ul_DepartmentMenuRoot);
+                Console.WriteLine(bestSellersPage.Ul_DepartmentMenuRoot.InnerHtml);
+                Console.WriteLine(bestSellersPage.Ul_DepartmentList.InnerHtml);
+                var allDepts = bestSellersPage.Ul_DepartmentList.Items;
+                foreach(var dept in allDepts)
+                {
+                    _loadAllLeafNodes(bestSellersPage, dept);
+                }
                 /*
                 foreach (Li item in allDepts)
                 {
@@ -31,24 +33,31 @@ namespace FetchData.Amazon.Scrap
             }
         }
         
-        private Stack<Ul> _departmentMenuStack = new Stack<Ul>();
-        private void _traverseDepartmentMenuTree(Li deptSelected, Ul parentUl)
+        private Stack<Li> _allLeafNodes = new Stack<Li>();
+        private void _loadAllLeafNodes(Pages.AmazonBestSellersPage bestSellersPage, Li deptSelected)
         {
-            deptSelected.Links[0].Click();
-            Console.WriteLine(_bestSellersPage.Ul_DepartmentMenuRoot.InnerHtml);
-            Console.WriteLine(_bestSellersPage.Ul_DepartmentList.InnerHtml);
-            
-        }
-        /*
-        Pages.AmazonBestSellersPage _previousPage;
-        private Pages.AmazonBestSellersPage _openDepartmentPage(Ul browserRoot, Li linkToClick)
-        {
-            //if there is no sub-dept found under department root menu then return. 
-            if (linkToClick == null)
-                return _previousPage;
+            string prevInnerHtml = bestSellersPage.Ul_DepartmentMenuRoot.InnerHtml;
 
-            
+            //click link inside <li> to load that sub-dept page
+            //this will automatically update AmazonBestSellersPage with new page load
+            deptSelected.Links[0].Click();
+
+            //determine if this dept is NOT a leaf node in dept menu hierarchy
+            //then keep drilling down
+            if (prevInnerHtml != bestSellersPage.Ul_DepartmentMenuRoot.InnerHtml)
+            {
+                foreach (var dept in bestSellersPage.Ul_DepartmentList.Items)
+                {
+                    _loadAllLeafNodes(bestSellersPage, dept);
+                }
+            }
+
+            //if a leaf node, then add all its siblings to stacks
+            foreach(var item in bestSellersPage.Ul_DepartmentList.Items)
+            {
+                _allLeafNodes.Push(item);
+            }
         }
-        */
+        
     }
 }

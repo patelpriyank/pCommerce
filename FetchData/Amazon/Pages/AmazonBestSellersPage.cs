@@ -6,6 +6,20 @@ namespace FetchData.Amazon.Pages
     public class AmazonBestSellersPage : WatiN.Core.Page
     {
         private const string ul_DepartmentId = "zg_browseRoot";
+        private const string li_selected = "zg_selected";
+
+        public Li Li_DepartmentSelected
+        {
+            get
+            {
+                return Document.ElementOfType<Li>(li_selected);
+            }
+        }
+        
+        public bool IsLeafNode(Li dept)
+        {
+            return (dept.NextSibling is Ul) ? false : true;
+        }
 
         public Ul Ul_DepartmentMenuRoot
         {
