@@ -8,6 +8,10 @@ namespace FetchData.Amazon.Scrap
 {
     public class ScrapAmazonBestSellers
     {
+        private Stack<Li> _allLeafNodes = new Stack<Li>();
+        private int MAX_RECURSSION_LOOP = 10;
+        private int _currentLoopCounter = 0;
+
         public void Scrap()
         {
             using (var browser = new IE("https://www.amazon.com/Best-Sellers/zgbs/ref=zg_bsms_tab"))
@@ -17,7 +21,8 @@ namespace FetchData.Amazon.Scrap
                 Console.WriteLine(bestSellersPage.Ul_DepartmentMenuRoot.InnerHtml);
                 Console.WriteLine(bestSellersPage.Ul_DepartmentList.InnerHtml);
                 var allDepts = bestSellersPage.Ul_DepartmentList.Items;
-                foreach(var dept in allDepts)
+                _allLeafNodes.Clear();
+                foreach (var dept in allDepts)
                 {
                     _loadAllLeafNodes(bestSellersPage, dept);
                 }
@@ -32,30 +37,36 @@ namespace FetchData.Amazon.Scrap
                 */
             }
         }
-        
-        private Stack<Li> _allLeafNodes = new Stack<Li>();
+
         private void _loadAllLeafNodes(Pages.AmazonBestSellersPage bestSellersPage, Li deptSelected)
         {
+            if (_currentLoopCounter < MAX_RECURSSION_LOOP)
+                _currentLoopCounter++;
+            else
+                return;
+
             string prevInnerHtml = bestSellersPage.Ul_DepartmentMenuRoot.InnerHtml;
 
             //click link inside <li> to load that sub-dept page
             //this will automatically update AmazonBestSellersPage with new page load
             deptSelected.Links[0].Click();
 
-            //determine if this dept is NOT a leaf node in dept menu hierarchy
-            //then keep drilling down
-            if (prevInnerHtml != bestSellersPage.Ul_DepartmentMenuRoot.InnerHtml)
+            //if a leaf node, then add all its siblings to stacks
+            if (bestSellersPage.IsLeafNode(deptSelected))
+            {
+                foreach (var item in bestSellersPage.Ul_DepartmentList.Items)
+                {
+                    _allLeafNodes.Push(item);
+                }
+                return;
+            }
+            //else keep drilling down
+            else 
             {
                 foreach (var dept in bestSellersPage.Ul_DepartmentList.Items)
                 {
                     _loadAllLeafNodes(bestSellersPage, dept);
                 }
-            }
-
-            //if a leaf node, then add all its siblings to stacks
-            foreach(var item in bestSellersPage.Ul_DepartmentList.Items)
-            {
-                _allLeafNodes.Push(item);
             }
         }
         

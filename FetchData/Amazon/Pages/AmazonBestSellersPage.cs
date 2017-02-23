@@ -30,7 +30,7 @@ namespace FetchData.Amazon.Pages
         {
             get
             {
-                return Document.ElementOfType<Ul>(ul_DepartmentId).ChildrenOfType<Ul>()[0];
+                return Ul_DepartmentMenuRoot.ChildrenOfType<Ul>()[0];
                 //return ((IElementContainer)Document.Element(Find.ById(ul_DepartmentId))).ElementOfType<Ul>("");
             }
         }
