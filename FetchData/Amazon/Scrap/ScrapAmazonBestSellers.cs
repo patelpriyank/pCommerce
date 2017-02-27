@@ -38,18 +38,25 @@ namespace FetchData.Amazon.Scrap
             }
         }
 
-        private void _loadAllLeafNodes(Pages.AmazonBestSellersPage bestSellersPage, Li deptSelected)
+        /*
+         1. click on the link inside the node
+         2. get 'zg_selected' <li>
+         3. if parent <ul> has structure of <ul> <li zg_selected><ul>...</ul> </ul> then it is not a leaf node
+            if parent <ul> has structure of <ul> all <li> </ul> then it is a leaf node
+         4. Add all <li> under that parents into leaf nodes stack
+         5. otherwise keep drillingdown 
+             */
+        
+        private void _loadAllLeafNodes(Pages.AmazonBestSellersPage bestSellersPage)
         {
             if (_currentLoopCounter < MAX_RECURSSION_LOOP)
                 _currentLoopCounter++;
             else
                 return;
 
-            string prevInnerHtml = bestSellersPage.Ul_DepartmentMenuRoot.InnerHtml;
-
             //click link inside <li> to load that sub-dept page
             //this will automatically update AmazonBestSellersPage with new page load
-            deptSelected.Links[0].Click();
+            bestSellersPage.Li_DepartmentSelected.Links[0].Click();
 
             //if a leaf node, then add all its siblings to stacks
             if (bestSellersPage.IsLeafNode(deptSelected))

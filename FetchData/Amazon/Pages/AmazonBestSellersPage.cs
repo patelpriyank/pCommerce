@@ -16,9 +16,14 @@ namespace FetchData.Amazon.Pages
             }
         }
         
-        public bool IsLeafNode(Li dept)
+        public bool IsLastMenuLevel()
         {
-            return (dept.NextSibling is Ul) ? false : true;
+            if (Li_DepartmentSelected.Parent != null)
+            {
+                Ul parentUl = ((Ul)Li_DepartmentSelected.Parent);
+                if (parentUl.ChildrenOfType<Ul>().Count == 0) return true;
+            }
+            return false;
         }
 
         public Ul Ul_DepartmentMenuRoot
