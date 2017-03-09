@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace FetchData.Models
 {
-    public class AmazonBestSellersItemInfo
+    public class AmazonBestSellersItemModel
     {
         private string _department;
         public string Department
@@ -57,6 +57,12 @@ namespace FetchData.Models
             set { _iaPeimw = value; }
         }
 
+        private string _departmentHierarchy;
+        public string DepartmentHierarchy
+        {
+           get { return _departmentHierarchy; }
+            set { _departmentHierarchy = value; }
+        }
 
     }
 }

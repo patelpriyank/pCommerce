@@ -12,11 +12,12 @@ namespace FetchData.Amazon.Pages
         {
             get
             {
+                //TODO: get <span zg_selected> inside <li>
                 return Document.ElementOfType<Li>(li_selected);
             }
         }
         
-        public bool IsLastMenuLevel()
+        public bool IsLeafMenu()
         {
             if (Li_DepartmentSelected.Parent != null)
             {

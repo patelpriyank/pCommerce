@@ -3,11 +3,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using WatiN.Core;
+using FetchData.Models;
 
 namespace FetchData.Amazon.Scrap
 {
     public class ScrapAmazonBestSellers
     {
+        private List<MenuItemModel> _visitedNodes = new List<MenuItemModel>();
         private Stack<Li> _allLeafNodes = new Stack<Li>();
         private int MAX_RECURSSION_LOOP = 10;
         private int _currentLoopCounter = 0;
@@ -17,24 +19,23 @@ namespace FetchData.Amazon.Scrap
             using (var browser = new IE("https://www.amazon.com/Best-Sellers/zgbs/ref=zg_bsms_tab"))
             {
                 var bestSellersPage = browser.Page<Pages.AmazonBestSellersPage>();
-
-                Console.WriteLine(bestSellersPage.Ul_DepartmentMenuRoot.InnerHtml);
-                Console.WriteLine(bestSellersPage.Ul_DepartmentList.InnerHtml);
                 var allDepts = bestSellersPage.Ul_DepartmentList.Items;
                 _allLeafNodes.Clear();
-                foreach (var dept in allDepts)
+
+                var rootMenu = new MenuItemModel();
+                rootMenu.Name = "All Departments";
+                rootMenu.Path = rootMenu.Name;
+                _visitedNodes.Add(rootMenu);
+
+                foreach (Li dept in allDepts)
                 {
-                    _loadAllLeafNodes(bestSellersPage, dept);
+                    /*
+                     * Clicking hyperlik on page automatically refreshes 
+                     * AmazonBestSellersPage instance with latest DOM and HTML.
+                    */
+                    dept.Links[0].Click();
+                    _traverseToLeafMenus(bestSellersPage, rootMenu);
                 }
-                /*
-                foreach (Li item in allDepts)
-                {
-                    item.Links[0].Click();
-                    Console.WriteLine( _bestSellersPage.Ul_DepartmentMenuRoot.InnerHtml);
-                    Console.WriteLine( _bestSellersPage.Ul_DepartmentList.InnerHtml);
-                    Console.WriteLine(item.InnerHtml);
-                }
-                */
             }
         }
 
@@ -45,21 +46,22 @@ namespace FetchData.Amazon.Scrap
             if parent <ul> has structure of <ul> all <li> </ul> then it is a leaf node
          4. Add all <li> under that parents into leaf nodes stack
          5. otherwise keep drillingdown 
-             */
+         */
         
-        private void _loadAllLeafNodes(Pages.AmazonBestSellersPage bestSellersPage)
+        private void _traverseToLeafMenus(Pages.AmazonBestSellersPage bestSellersPage, MenuItemModel parentNode)
         {
+            var selectedMenu = new MenuItemModel();
+            selectedMenu.Name = bestSellersPage.Li_DepartmentSelected.InnerHtml;
+            selectedMenu.Path = parentNode.Path + "->" + selectedMenu.Name;
+            _visitedNodes.Add(selectedMenu);
+
             if (_currentLoopCounter < MAX_RECURSSION_LOOP)
                 _currentLoopCounter++;
             else
                 return;
-
-            //click link inside <li> to load that sub-dept page
-            //this will automatically update AmazonBestSellersPage with new page load
-            bestSellersPage.Li_DepartmentSelected.Links[0].Click();
-
+            
             //if a leaf node, then add all its siblings to stacks
-            if (bestSellersPage.IsLeafNode(deptSelected))
+            if (bestSellersPage.IsLeafMenu())
             {
                 foreach (var item in bestSellersPage.Ul_DepartmentList.Items)
                 {
@@ -72,7 +74,7 @@ namespace FetchData.Amazon.Scrap
             {
                 foreach (var dept in bestSellersPage.Ul_DepartmentList.Items)
                 {
-                    _loadAllLeafNodes(bestSellersPage, dept);
+                    _traverseToLeafMenus(bestSellersPage, selectedMenu);
                 }
             }
         }

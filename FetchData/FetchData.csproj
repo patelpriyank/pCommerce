@@ -52,9 +52,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Extensions\Extensions.cs" />
     <Compile Include="Extensions\Ul_Li_Watin.cs" />
     <Compile Include="Amazon\Pages\AmazonBestSellersPage.cs" />
-    <Compile Include="Models\AmazonBestSellersItemInfo.cs" />
+    <Compile Include="Models\AmazonBestSellersItemModel.cs" />
+    <Compile Include="Models\MenuItemModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Amazon\Scrap\ScrapAmazonBestSellers.cs" />
   </ItemGroup>
